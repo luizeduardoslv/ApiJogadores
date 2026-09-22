@@ -112,5 +112,4 @@ dotnet build
 ## Vídeo de demonstração
 
 Link do vídeo:
-
-`ADICIONAR LINK DO VÍDEO AQUI`
+https://youtu.be/i_Z3Wkktx8E?is=1cVLXo8jDJffj_iz
