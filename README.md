@@ -2,11 +2,13 @@
 
 ## Sobre o projeto
 
-Este projeto consiste em uma API desenvolvida para realizar o gerenciamento de jogadores de futebol.
+Este projeto consiste em uma API REST desenvolvida para o gerenciamento de jogadores de futebol, utilizando ASP.NET Core Minimal API.
 
-A API permite listar, buscar, cadastrar, atualizar e remover jogadores. Os dados são armazenados em memória utilizando uma `List<JogadorDto>`.
+A aplicação permite listar, buscar, cadastrar, atualizar e remover jogadores. Os dados são armazenados em um banco de dados SQLite, utilizando Entity Framework Core, garantindo que os registros continuem salvos mesmo após o encerramento da aplicação.
 
-Projeto desenvolvido como atividade avaliativa utilizando os conteúdos estudados até a Aula 06.
+O projeto também possui uma interface web integrada, permitindo realizar as operações de gerenciamento diretamente pelo navegador.
+
+Projeto desenvolvido como atividade avaliativa de continuidade da AP1, contemplando persistência de dados, integração entre frontend e backend e testes dos endpoints.
 
 ## Tecnologias utilizadas
 
@@ -14,34 +16,65 @@ Projeto desenvolvido como atividade avaliativa utilizando os conteúdos estudado
 - ASP.NET Core
 - .NET 10
 - Minimal API
+- Entity Framework Core
+- SQLite
+- HTML, CSS e JavaScript
 - Bruno
 
 ## Como executar
 
-No terminal, dentro da pasta do projeto, execute:
+É necessário ter o SDK do .NET 10 instalado.
+
+1. Abra o terminal na pasta do projeto.
+2. Restaure as dependências:
 
 ```bash
-dotnet run --urls http://localhost:5050
+dotnet restore
 ```
 
-A API ficará disponível em:
+3. Aplique as migrations para criar ou atualizar o banco de dados:
 
-`http://localhost:5050`
+```bash
+dotnet ef database update
+```
 
-Para verificar se a API está funcionando:
+4. Inicie a aplicação:
 
-`GET http://localhost:5050/`
+```bash
+dotnet run
+```
+
+O terminal mostrará o endereço local em que a aplicação está sendo executada. Acesse esse endereço no navegador para abrir a interface web.
+
+A API utiliza a rota base:
+
+```text
+/api/jogadores
+```
+
+## Interface web
+
+A interface está localizada na pasta `wwwroot` e é servida pela própria aplicação ASP.NET Core.
+
+Por meio dela, é possível:
+
+- Listar os jogadores cadastrados.
+- Cadastrar novos jogadores.
+- Editar jogadores existentes.
+- Excluir jogadores.
+- Visualizar os registros armazenados no banco de dados.
+
+O frontend realiza as requisições HTTP para a API utilizando JavaScript (`fetch`).
 
 ## Endpoints
 
-| Método | Rota | Descrição | Retorno |
+| Método | Rota | Descrição | Retorno esperado |
 |---|---|---|---|
-| GET | `/` | Verifica se a API está no ar | 200 |
-| GET | `/api/jogadores` | Lista todos os jogadores | 200 |
-| GET | `/api/jogadores/{id}` | Busca um jogador pelo ID | 200 ou 404 |
-| POST | `/api/jogadores` | Cadastra um novo jogador | 201 |
-| PUT | `/api/jogadores/{id}` | Atualiza um jogador | 200 ou 404 |
-| DELETE | `/api/jogadores/{id}` | Remove um jogador | 204 ou 404 |
+| GET | `/api/jogadores` | Lista todos os jogadores | 200 OK |
+| GET | `/api/jogadores/{id}` | Busca um jogador pelo ID | 200 OK ou 404 Not Found |
+| POST | `/api/jogadores` | Cadastra um jogador | 201 Created |
+| PUT | `/api/jogadores/{id}` | Atualiza um jogador | 200 OK ou 404 Not Found |
+| DELETE | `/api/jogadores/{id}` | Remove um jogador | 204 No Content ou 404 Not Found |
 
 ## Exemplo de cadastro
 
@@ -49,7 +82,7 @@ Requisição:
 
 `POST /api/jogadores`
 
-JSON:
+Corpo JSON:
 
 ```json
 {
@@ -65,7 +98,7 @@ Requisição:
 
 `PUT /api/jogadores/3`
 
-JSON:
+Corpo JSON:
 
 ```json
 {
@@ -75,11 +108,19 @@ JSON:
 }
 ```
 
-## Armazenamento dos dados
+O ID utilizado no exemplo deve corresponder a um jogador existente no banco de dados.
 
-Os dados são armazenados somente em memória utilizando uma `List<JogadorDto>`.
+## Banco de dados e persistência
 
-Por isso, jogadores cadastrados, atualizados ou removidos durante a execução não são mantidos após a API ser encerrada e iniciada novamente.
+Os registros são armazenados em um banco de dados SQLite, utilizando o Entity Framework Core.
+
+O contexto do banco está definido em `Data/AppDbContext.cs`, e a entidade `Jogador` representa os dados de cada jogador.
+
+As migrations ficam na pasta `Migrations` e são versionadas no repositório para permitir a criação e atualização da estrutura do banco.
+
+O arquivo local `jogadores.db` não deve ser enviado ao GitHub. Ele é criado localmente quando necessário, a partir das migrations.
+
+Os dados cadastrados permanecem salvos após encerrar e iniciar novamente a aplicação.
 
 ## Testes com Bruno
 
@@ -87,29 +128,19 @@ As requisições utilizadas para testar a API estão disponíveis na pasta:
 
 `bruno/`
 
-A Collection possui testes para:
+A Collection permite testar as operações de consulta, cadastro, atualização e exclusão, incluindo as respostas HTTP esperadas e os casos de jogador inexistente.
 
-- verificar se a API está no ar;
-- listar jogadores;
-- buscar jogador por ID;
-- cadastrar jogador;
-- atualizar jogador;
-- remover jogador;
-- confirmar a remoção através do retorno 404.
-
-O Environment `Local` utiliza:
-
-`baseUrl = http://localhost:5050`
+Para executar os testes, inicie a aplicação e utilize o endereço local informado pelo terminal como base das requisições.
 
 ## Compilação
 
-Para verificar a compilação do projeto:
+Para verificar se o projeto compila corretamente, execute:
 
 ```bash
 dotnet build
 ```
 
-## Vídeo de demonstração
+Vídeo de demonstração — AP2
+O vídeo apresenta a execução da API de jogadores com persistência em SQLite, a integração com o frontend, os testes das operações CRUD e a manutenção dos dados após reiniciar a aplicação.
 
-Link do vídeo:
-https://youtu.be/i_Z3Wkktx8E?is=1cVLXo8jDJffj_iz
+Link do vídeo: https://youtu.be/HFUndtP1Kdg

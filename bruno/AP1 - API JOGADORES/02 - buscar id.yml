@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/api/jogadores/1"
+  url: http://localhost:5290/api/jogadores/6
   auth: inherit
 
 settings:

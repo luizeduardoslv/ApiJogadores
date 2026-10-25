@@ -5,7 +5,15 @@ info:
 
 http:
   method: PUT
-  url: "{{baseUrl}}/api/jogadores/3"
+  url: http://localhost:5290/api/jogadores/5
+  body:
+    type: json
+    data: |-
+      {
+        "nome": "Eduardo",
+        "numero": 99,
+        "posicao": "Meia"
+      }
   auth: inherit
 
 settings:

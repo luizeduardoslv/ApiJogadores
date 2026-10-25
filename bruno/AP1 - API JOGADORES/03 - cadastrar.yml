@@ -6,6 +6,14 @@ info:
 http:
   method: POST
   url: "{{baseUrl}}/api/jogadores"
+  body:
+    type: json
+    data: |-
+      {
+        "nome": "Luiz",
+        "numero": 99,
+        "posicao": "Meia"
+      }
   auth: inherit
 
 settings:

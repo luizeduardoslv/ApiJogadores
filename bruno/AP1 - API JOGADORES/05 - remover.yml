@@ -5,7 +5,7 @@ info:
 
 http:
   method: DELETE
-  url: "URL: {{baseUrl}}/api/jogadores/3"
+  url: http://localhost:5290/api/jogadores/5
   auth: inherit
 
 settings:

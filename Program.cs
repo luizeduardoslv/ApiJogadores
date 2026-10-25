@@ -1,83 +1,98 @@
+using ApiJogadores.Data;
+using ApiJogadores.Models;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=jogadores.db"));
+
 var app = builder.Build();
 
-var jogadores = new List<JogadorDto>
-{
-    new JogadorDto(1, "Carlos", 10, "Meia"),
-    new JogadorDto(2, "Rafael", 9, "Centroavante")
-};
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
-app.MapGet("/", () => "API de Jogadores está no ar!");
-
-app.MapGet("/api/jogadores", () =>
+app.MapGet("/api/jogadores", async (AppDbContext db) =>
 {
+    var jogadores = await db.Jogadores.ToListAsync();
+
     return Results.Ok(jogadores);
 });
 
-app.MapGet("/api/jogadores/{id:int}", (int id) =>
+app.MapGet("/api/jogadores/{id:int}", async (int id, AppDbContext db) =>
 {
-    var jogador = jogadores.Find(jogadorDaLista => jogadorDaLista.Id == id);
+    var jogador = await db.Jogadores.FindAsync(id);
 
     if (jogador is null)
     {
-        return Results.NotFound(new { mensagem = "Jogador não encontrado." });
+        return Results.NotFound(
+            new { mensagem = "Jogador não encontrado." });
     }
 
     return Results.Ok(jogador);
 });
 
-app.MapPost("/api/jogadores", (JogadorEntradaDto dados) =>
+app.MapPost("/api/jogadores", async (
+    JogadorEntradaDto dados,
+    AppDbContext db) =>
 {
-    int proximoId = jogadores.Count + 1;
+    var novoJogador = new Jogador
+    {
+        Nome = dados.Nome,
+        Numero = dados.Numero,
+        Posicao = dados.Posicao
+    };
 
-    var novoJogador = new JogadorDto(
-        proximoId,
-        dados.Nome,
-        dados.Numero,
-        dados.Posicao
-    );
+    db.Jogadores.Add(novoJogador);
 
-    jogadores.Add(novoJogador);
+    await db.SaveChangesAsync();
 
-    return Results.Created($"/api/jogadores/{novoJogador.Id}", novoJogador);
+    return Results.Created(
+        $"/api/jogadores/{novoJogador.Id}",
+        novoJogador);
 });
 
-app.MapPut("/api/jogadores/{id:int}", (int id, JogadorEntradaDto dados) =>
+app.MapPut("/api/jogadores/{id:int}", async (
+    int id,
+    JogadorEntradaDto dados,
+    AppDbContext db) =>
 {
-    int indice = jogadores.FindIndex(jogadorDaLista => jogadorDaLista.Id == id);
+    var jogador = await db.Jogadores.FindAsync(id);
 
-    if (indice == -1)
+    if (jogador is null)
     {
-        return Results.NotFound(new { mensagem = "Jogador não encontrado." });
+        return Results.NotFound(
+            new { mensagem = "Jogador não encontrado." });
     }
 
-    var atualizado = new JogadorDto(
-        id,
-        dados.Nome,
-        dados.Numero,
-        dados.Posicao
-    );
+    jogador.Nome = dados.Nome;
+    jogador.Numero = dados.Numero;
+    jogador.Posicao = dados.Posicao;
 
-    jogadores[indice] = atualizado;
+    await db.SaveChangesAsync();
 
-    return Results.Ok(atualizado);
+    return Results.Ok(jogador);
 });
 
-app.MapDelete("/api/jogadores/{id:int}", (int id) =>
+app.MapDelete("/api/jogadores/{id:int}", async (
+    int id,
+    AppDbContext db) =>
 {
-    int indice = jogadores.FindIndex(jogadorDaLista => jogadorDaLista.Id == id);
+    var jogador = await db.Jogadores.FindAsync(id);
 
-    if (indice == -1)
+    if (jogador is null)
     {
-        return Results.NotFound(new { mensagem = "Jogador não encontrado." });
+        return Results.NotFound(
+            new { mensagem = "Jogador não encontrado." });
     }
 
-    jogadores.RemoveAt(indice);
+    db.Jogadores.Remove(jogador);
+
+    await db.SaveChangesAsync();
 
     return Results.NoContent();
 });
 
 app.Run();
 
-record JogadorDto(int Id, string Nome, int Numero, string Posicao);
 record JogadorEntradaDto(string Nome, int Numero, string Posicao);

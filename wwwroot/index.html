@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApiJogadores - Gerenciador de Atletas</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Barra de Notificação Superior (Status de Conexão com a API) -->
+  <aside class="demo-banner api-banner" aria-label="Status da integração com a API">
+    <div class="container demo-banner-content">
+      <span class="demo-pill api-pill" id="api-status-pill">⚡ API INTEGRADA</span>
+      <p class="demo-text" id="api-status-text">
+        Conectado aos endpoints <code>/api/jogadores</code> e persistindo no banco SQLite.
+      </p>
+    </div>
+  </aside>
+
+  <!-- Cabeçalho Principal -->
+  <header class="app-header">
+    <div class="container header-container">
+      <div class="branding">
+        <div class="logo-icon" aria-hidden="true">
+          <!-- Ícone SVG de Bola de Futebol -->
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="12 6 15.5 8.5 14 12.5 10 12.5 8.5 8.5"></polygon>
+            <line x1="12" y1="6" x2="12" y2="2"></line>
+            <line x1="15.5" y1="8.5" x2="19.5" y2="6.5"></line>
+            <line x1="14" y1="12.5" x2="17" y2="16"></line>
+            <line x1="10" y1="12.5" x2="7" y2="16"></line>
+            <line x1="8.5" y1="8.5" x2="4.5" y2="6.5"></line>
+            <line x1="12" y1="19" x2="12" y2="22"></line>
+          </svg>
+        </div>
+        <div>
+          <h1 class="app-title">ApiJogadores</h1>
+          <p class="app-subtitle">Painel de Gerenciamento de Elenco</p>
+        </div>
+      </div>
+
+      <div class="header-stats">
+        <div class="stat-badge">
+          <span class="stat-label">Total de Atletas</span>
+          <span class="stat-value" id="total-jogadores">0</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="container main-content">
+
+    <!-- Seção de Formulário (Cadastro / Edição) -->
+    <section class="card form-card" id="form-section">
+      <div class="card-header">
+        <div class="card-title-group">
+          <h2 class="card-title" id="form-titulo">Cadastrar Jogador</h2>
+          <p class="card-description" id="form-descricao">Preencha os dados abaixo para adicionar um novo atleta ao time.</p>
+        </div>
+        <span class="status-indicator" id="modo-indicador">Novo Registro</span>
+      </div>
+
+      <form id="jogador-form" class="form-body" novalidate>
+        <input type="hidden" id="jogador-id">
+
+        <div class="form-grid">
+          <!-- Campo: Nome -->
+          <div class="form-group form-group-span">
+            <label for="nome" class="form-label">
+              Nome do Jogador <span class="required">*</span>
+            </label>
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <input 
+                type="text" 
+                id="nome" 
+                name="nome" 
+                class="form-control" 
+                placeholder="Ex: Vinicius Júnior" 
+                autocomplete="off" 
+                required>
+            </div>
+            <span class="error-msg" id="erro-nome"></span>
+          </div>
+
+          <!-- Campo: Número da Camisa -->
+          <div class="form-group">
+            <label for="numero" class="form-label">
+              Número da Camisa <span class="required">*</span>
+            </label>
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="4" y1="9" x2="20" y2="9"></line>
+                <line x1="4" y1="15" x2="20" y2="15"></line>
+                <line x1="10" y1="3" x2="8" y2="21"></line>
+                <line x1="16" y1="3" x2="14" y2="21"></line>
+              </svg>
+              <input 
+                type="number" 
+                id="numero" 
+                name="numero" 
+                class="form-control" 
+                placeholder="Ex: 7" 
+                min="1" 
+                max="99" 
+                required>
+            </div>
+            <span class="error-msg" id="erro-numero"></span>
+          </div>
+
+          <!-- Campo: Posição -->
+          <div class="form-group">
+            <label for="posicao" class="form-label">
+              Posição em Campo <span class="required">*</span>
+            </label>
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <select id="posicao" name="posicao" class="form-control select-control" required>
+                <option value="" disabled selected>Selecione uma posição...</option>
+                <option value="Goleiro">Goleiro</option>
+                <option value="Zagueiro">Zagueiro</option>
+                <option value="Lateral">Lateral</option>
+                <option value="Meio-campo">Meio-campo</option>
+                <option value="Atacante">Atacante</option>
+              </select>
+            </div>
+            <span class="error-msg" id="erro-posicao"></span>
+          </div>
+        </div>
+
+        <!-- Barra de Ações do Formulário -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="btn-submit">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span id="btn-submit-texto">Cadastrar Jogador</span>
+          </button>
+
+          <button type="button" class="btn btn-secondary" id="btn-cancelar" style="display: none;">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            <span>Cancelar Edição</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Seção de Listagem de Jogadores -->
+    <section class="card table-card">
+      <div class="card-header table-header">
+        <div class="card-title-group">
+          <h2 class="card-title">Plantel de Jogadores</h2>
+          <p class="card-description">Lista sincronizada diretamente com o banco de dados via API.</p>
+        </div>
+
+        <div class="table-actions">
+          <button type="button" class="btn btn-outline" id="btn-recarregar" title="Atualizar a lista a partir da API">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <polyline points="23 20 23 14 17 14"></polyline>
+              <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+            </svg>
+            <span>Recarregar Lista</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Estado de Carregamento (Loading) -->
+      <div class="loading-state" id="loading-state" style="display: none;" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <p class="loading-text">Consultando jogadores na API...</p>
+      </div>
+
+      <!-- Estado de Erro de Conexão com a API -->
+      <div class="error-state" id="error-state" style="display: none;" role="alert">
+        <div class="error-state-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <h3 class="error-state-title">Falha ao obter dados da API</h3>
+        <p class="error-state-text" id="error-state-text">Não foi possível carregar a lista de jogadores.</p>
+        <button type="button" class="btn btn-primary btn-sm" id="btn-tentar-novamente">
+          Tentar Novamente
+        </button>
+      </div>
+
+      <!-- Tabela Responsiva -->
+      <div class="table-responsive" id="table-wrapper">
+        <table class="data-table" id="tabela-jogadores">
+          <thead>
+            <tr>
+              <th scope="col" class="th-camisa">Camisa</th>
+              <th scope="col" class="th-nome">Nome do Jogador</th>
+              <th scope="col" class="th-posicao">Posição</th>
+              <th scope="col" class="th-acoes">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-corpo">
+            <!-- As linhas serão inseridas dinamicamente pelo JavaScript usando textContent -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Estado Vazio (exibido quando a API retornar 0 jogadores) -->
+      <div class="empty-state" id="empty-state" style="display: none;">
+        <div class="empty-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+        </div>
+        <h3 class="empty-title">Nenhum jogador cadastrado</h3>
+        <p class="empty-text">Ainda não existem atletas no banco de dados. Cadastre o primeiro atleta utilizando o formulário acima.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="app-footer">
+    <div class="container footer-content">
+      <p>ApiJogadores &bull; Integrado à API ASP.NET Core &bull; HTML5, CSS3 e JavaScript Puro</p>
+      <p class="footer-note">Banco de Dados SQLite</p>
+    </div>
+  </footer>
+
+  <!-- Modal de Confirmação de Exclusão -->
+  <div class="modal-overlay" id="modal-confirmacao" role="dialog" aria-modal="true" aria-labelledby="modal-titulo" style="display: none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-icon-danger" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18"></path>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+        </div>
+        <div>
+          <h3 class="modal-title" id="modal-titulo">Excluir Jogador</h3>
+          <p class="modal-subtitle">Esta alteração será salva no banco de dados.</p>
+        </div>
+      </div>
+      <div class="modal-body">
+        <p>Tem certeza de que deseja remover o jogador <strong id="modal-jogador-nome">--</strong> (Camisa <strong id="modal-jogador-numero">--</strong>)?</p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="modal-btn-cancelar">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="modal-btn-confirmar">
+          <span id="modal-btn-confirmar-texto">Excluir</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Container de Notificações Flutuantes (Toasts) -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <!-- Script da Aplicação -->
+  <script src="js/app.js"></script>
+</body>
+</html>
